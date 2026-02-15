@@ -1,0 +1,51 @@
+def ingredient_line(line):
+    parts = line.split(' | ')
+    return {
+        'ingredient_name': parts[0].strip(),
+        'quantity': int(parts[1].strip()),
+        'measure': parts[2].strip()
+    }
+def load_cook_book(filepath):
+    cook_book = {}
+    with open(filepath, encoding='utf-8') as file:
+        lines = file.readlines()
+    i = 0
+    while i < len(lines):
+        while i < len(lines) and lines[i].strip() == '':
+            i += 1
+        if i >= len(lines):
+            break
+        dish_name = lines[i].strip()
+        i += 1
+
+        while i < len(lines) and lines[i].strip() == '':
+            i += 1
+        if i >= len(lines):
+            break
+        ingredient_count = int(lines[i].strip())
+        i += 1
+
+        ingredients = []
+        for _ in range(ingredient_count):
+            while i < len(lines) and lines[i].strip() == '':
+                i += 1
+            if i >= len(lines):
+                break
+            ingredients.append(ingredient_line(lines[i]))
+            i += 1
+
+        cook_book[dish_name] = ingredients
+
+    return cook_book
+
+def print_cook_book_pretty(cook_book):
+    for dish_name, ingredients in cook_book.items():
+        print(f"\n{dish_name}:")
+        print(f"  Ингредиенты ({len(ingredients)}):")
+        for ing in ingredients:
+            print(f"    • {ing['ingredient_name']}: {ing['quantity']} {ing['measure']}")
+
+
+if __name__ == '__main__':
+    cook_book = load_cook_book('recipes.txt')
+    print_cook_book_pretty(cook_book)
