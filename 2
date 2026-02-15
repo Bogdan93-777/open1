@@ -1,0 +1,62 @@
+def parse_ingredient_line(line):
+    parts = line.split('|')
+    return {
+        'ingredient_name': parts[0].strip(),
+        'quantity': int(parts[1].strip()),
+        'measure': parts[2].strip()
+    }
+def load_cook_book(filepath):
+    cook_book = {}
+    with open(filepath, encoding='utf-8') as file:
+        lines = file.readlines()
+    i = 0
+    while i < len(lines):
+        while i < len(lines) and not lines[i].strip():
+            i += 1
+        if i >= len(lines):
+            break
+        dish_name = lines[i].strip()
+        i += 1
+        while i < len(lines) and not lines[i].strip():
+            i += 1
+        if i >= len(lines):
+            break
+        ingredient_count = int(lines[i].strip())
+        i += 1
+        ingredients = []
+        for _ in range(ingredient_count):
+            while i < len(lines) and not lines[i].strip():
+                i += 1
+            if i >= len(lines):
+                break
+            ingredients.append(parse_ingredient_line(lines[i]))
+            i += 1
+        cook_book[dish_name] = ingredients
+    return cook_book
+def get_shop_list_by_dishes(cook_book, dishes, person_count):
+    shop_list = {}
+
+    for dish_name in dishes:
+        if dish_name not in cook_book:
+            print(f"⚠️  Блюдо '{dish_name}' не найдено в книге рецептов.")
+            continue
+        for ingredient in cook_book[dish_name]:
+            name = ingredient['ingredient_name']
+            measure = ingredient['measure']
+            quantity = ingredient['quantity'] * person_count
+            if name in shop_list:
+                shop_list[name]['quantity'] += quantity
+            else:
+                shop_list[name] = {'measure': measure, 'quantity': quantity}
+    return shop_list
+def print_shop_list(shop_list):
+    for ingredient, info in sorted(shop_list.items()):
+        print(f"{ingredient:} {info['quantity']:} {info['measure']}")
+if __name__ == '__main__':
+    cook_book = load_cook_book('recipes.txt')
+    dishes_to_cook = ['Запеченный картофель', 'Омлет']
+    persons = 2
+    shop_list = get_shop_list_by_dishes(cook_book, dishes_to_cook, persons)
+    print_shop_list(shop_list)
+import json
+print(json.dumps(shop_list, ensure_ascii=False, indent=4))
